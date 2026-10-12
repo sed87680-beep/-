@@ -1,4 +1,4 @@
--- 이동속도: 총 조준 중 50% 감소, 방패 들고 있을 때 40% 감소
+-- 이동속도: 총 들고 우클릭(조준) 50% 감소, 방패 들고 우클릭 40% 감소
 -- 다른 스크립트(달리기 등)가 WalkSpeed를 바꾸면 그 값을 기본 속도로 삼고 배율만 곱합니다.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -52,9 +52,13 @@ local function isAiming()
 	return aimHeld and StanceUtil.isHoldingGun(character)
 end
 
+local function isRaisingShield()
+	return aimHeld and StanceUtil.hasShield(character)
+end
+
 local function getMultiplier()
 	local aimMult = isAiming() and SpeedConfig.AimMultiplier or 1
-	local shieldMult = StanceUtil.hasShield(character) and SpeedConfig.ShieldMultiplier or 1
+	local shieldMult = isRaisingShield() and SpeedConfig.ShieldMultiplier or 1
 	if SpeedConfig.StackMode == "multiply" then
 		return aimMult * shieldMult
 	end

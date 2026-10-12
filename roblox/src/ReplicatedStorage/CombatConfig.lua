@@ -18,13 +18,14 @@ CombatConfig.GunNamePatterns = { "gun", "rifle", "pistol", "smg", "shotgun", "�
 -- 이동속도
 ----------------------------------------------------------------------
 CombatConfig.Speed = {
-	AimMultiplier = 0.5, -- 총 조준 중: 50% 감소
-	ShieldMultiplier = 0.6, -- 방패 들고 있을 때: 40% 감소
+	-- 둘 다 우클릭(AimInputs)을 누르고 있는 동안에만 적용
+	AimMultiplier = 0.5, -- 총 들고 우클릭(조준): 50% 감소
+	ShieldMultiplier = 0.6, -- 방패 들고 우클릭: 40% 감소
 
-	-- 조준 + 방패 동시: "min" = 더 많이 줄어드는 쪽(50%)만 적용, "multiply" = 곱함(0.5 x 0.6 = 70% 감소)
+	-- 총 + 방패 동시: "min" = 더 많이 줄어드는 쪽(50%)만 적용, "multiply" = 곱함(0.5 x 0.6 = 70% 감소)
 	StackMode = "min",
 
-	-- 조준 입력 (총을 든 상태에서 누르고 있는 동안 조준)
+	-- 우클릭 입력 (누르고 있는 동안 조준/방패 올림)
 	AimInputs = { Enum.UserInputType.MouseButton2 },
 	-- 다른 스크립트가 캐릭터에 Aiming 속성을 true로 넣어도 조준으로 처리
 	AimAttribute = "Aiming",
@@ -71,6 +72,15 @@ CombatConfig.Pose = {
 	RunFallbackPitchDegrees = -15,
 
 	BlendSpeed = 10, -- 자세 전환 부드러움 (클수록 빠름)
+
+	-- 게임에 원래 있는 공격/막기 애니메이션(Action 우선순위 이상)이 재생되는 동안은
+	-- 자세 덮어쓰기를 멈춰서 몽둥이 휘두르기 같은 모션이 그대로 보이게 함
+	YieldToActionAnimations = true,
+
+	-- 방패 Tool을 들면 오른손 대신 기준 모델(ShieldOnly)에서 방패가 붙어 있는 위치로 옮김
+	AttachShieldLikeReference = true,
+	-- 기준 모델에서 방패가 붙어 있을 수 있는 몸 부위 (가장 가까운 것을 사용)
+	ShieldBodyParts = { "LeftHand", "LeftLowerArm", "Left Arm", "RightHand", "RightLowerArm", "Right Arm" },
 }
 
 ----------------------------------------------------------------------

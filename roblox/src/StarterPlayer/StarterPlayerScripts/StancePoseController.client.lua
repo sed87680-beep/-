@@ -3,6 +3,7 @@
 --  - 방패 + 무기: PoseModels.ShieldAndWeapon 모델과 같은 팔 자세
 --  - 걸을 때는 손이 조금씩 흔들리고, 뛸 때는 뛰기 자세(_Run 모델)로 바뀌며 크게 흔들림
 -- 모든 플레이어 캐릭터에 적용하므로 다른 사람 자세도 똑같이 보입니다.
+-- 공격(몽둥이 휘두르기 등) 애니메이션이 재생되는 동안은 잠깐 꺼져서 원래 모션이 보입니다.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -67,6 +68,27 @@ local function poseTransform(motor, parts)
 	return (motor.C0:Inverse() * rel * motor.C1).Rotation
 end
 
+local actionPriorities = {
+	[Enum.AnimationPriority.Action] = true,
+	[Enum.AnimationPriority.Action2] = true,
+	[Enum.AnimationPriority.Action3] = true,
+	[Enum.AnimationPriority.Action4] = true,
+}
+
+-- 게임 자체 공격/막기 애니메이션이 재생 중인지
+local function isPlayingActionAnimation(humanoid)
+	local animator = humanoid:FindFirstChildOfClass("Animator")
+	if not animator then
+		return false
+	end
+	for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+		if actionPriorities[track.Priority] and track.WeightCurrent > 0.05 then
+			return true
+		end
+	end
+	return false
+end
+
 local states = setmetatable({}, { __mode = "k" })
 
 local function getState(character)
@@ -113,7 +135,9 @@ local function updateCharacter(character, dt, alpha)
 	if stance then
 		state.stance = stance
 	end
-	state.weight = approach(state.weight, stance and 1 or 0, alpha)
+	local yielding = PoseConfig.YieldToActionAnimations and isPlayingActionAnimation(humanoid)
+	-- 공격 모션은 바로 보여야 하므로 꺼질 때는 더 빠르게
+	state.weight = approach(state.weight, (stance and not yielding) and 1 or 0, yielding and math.min(1, alpha * 3) or alpha)
 	if state.weight < 0.01 then
 		state.weight = 0
 		table.clear(state.smoothed)
